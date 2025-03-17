@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Upload } from '@progress/kendo-react-upload';
-import { Card } from '@progress/kendo-react-layout';
+
+import React, { useState, useRef } from 'react';
 import { Button } from '@progress/kendo-react-buttons';
+import { Card } from '@progress/kendo-react-layout';
 import { Notification, NotificationGroup } from '@progress/kendo-react-notification';
 import { FileTextIcon, UploadIcon, FileIcon } from 'lucide-react';
 import { useResumeContext } from '../hooks/useResumeContext';
@@ -16,10 +16,11 @@ const ResumeUpload: React.FC = () => {
   } = useResumeContext();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = (event: any) => {
-    if (event.files && event.files.length > 0) {
-      const file = event.files[0].getRawFile();
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
       if (file.type !== 'application/pdf') {
         setError('Please upload a PDF file');
         return;
@@ -74,6 +75,9 @@ const ResumeUpload: React.FC = () => {
     setUploadedFile(null);
     setSuccess(null);
     setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const onDismissNotification = () => {
@@ -97,21 +101,34 @@ const ResumeUpload: React.FC = () => {
         </div>
 
         {!uploadedFile ? (
-          <Upload
-            batch={false}
-            multiple={false}
-            restrictions={{
-              allowedExtensions: ['.pdf'],
-              maxFileSize: 10485760 // 10MB
-            }}
-            onAdd={handleUpload}
-            onRemove={handleClearFile}
-            autoUpload={false}
-            saveUrl="dummy"
-            className="mb-6"
-          >
-            {/* We need to handle children differently with KendoReact Upload */}
-          </Upload>
+          <div className="bg-secondary p-6 rounded-lg mb-6">
+            <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center transition-all duration-300 hover:border-primary/50 hover:bg-primary/5">
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".pdf"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <div className="flex flex-col items-center gap-4">
+                <div className="bg-primary/10 p-3 rounded-full">
+                  <UploadIcon className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium mb-1">Drag and drop your PDF file here</p>
+                  <p className="text-sm text-muted-foreground mb-4">or click to browse files</p>
+                  <Button
+                    themeColor="primary"
+                    className="k-button k-button-md k-rounded-md"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <UploadIcon className="h-4 w-4 mr-2" />
+                    Select File
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="bg-secondary p-6 rounded-lg flex items-center gap-4 mb-6">
             <div className="bg-primary/10 p-3 rounded-full">
@@ -129,24 +146,6 @@ const ResumeUpload: React.FC = () => {
               className="k-button k-button-sm k-rounded-md"
             >
               Remove
-            </Button>
-          </div>
-        )}
-
-        {!uploadedFile && (
-          <div className="flex justify-center mt-4 mb-6">
-            <Button 
-              themeColor="primary"
-              className="k-button k-button-md k-rounded-md"
-              onClick={() => {
-                const fileInput = document.querySelector('input[type="file"]');
-                if (fileInput) {
-                  fileInput.click();
-                }
-              }}
-            >
-              <UploadIcon className="h-4 w-4 mr-2" />
-              Select File
             </Button>
           </div>
         )}

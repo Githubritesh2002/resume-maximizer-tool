@@ -1,24 +1,47 @@
 
-import React from 'react';
-import { PDFExport } from '@progress/kendo-react-pdf';
+import React, { useRef } from 'react';
 import { Button } from '@progress/kendo-react-buttons';
 import { Notification, NotificationGroup } from '@progress/kendo-react-notification';
 import { useResumeContext } from '../hooks/useResumeContext';
 import { DownloadIcon, PrinterIcon, CheckIcon } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const ResumePreview: React.FC = () => {
   const { resume } = useResumeContext();
   const [success, setSuccess] = React.useState<string | null>(null);
-  const pdfExportComponent = React.useRef<PDFExport>(null);
+  const resumeRef = useRef<HTMLDivElement>(null);
   
   if (!resume) {
     return null;
   }
   
-  const handleExportPDF = () => {
-    if (pdfExportComponent.current) {
-      pdfExportComponent.current.save();
-      setSuccess("Resume exported as PDF");
+  const handleExportPDF = async () => {
+    if (resumeRef.current) {
+      try {
+        const canvas = await html2canvas(resumeRef.current, { 
+          scale: 2,
+          useCORS: true,
+          logging: false 
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'px',
+          format: 'letter'
+        });
+        
+        const imgWidth = pdf.internal.pageSize.getWidth();
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save(`${resume.name.replace(/\s+/g, '-').toLowerCase()}-resume.pdf`);
+        
+        setSuccess("Resume exported as PDF");
+      } catch (error) {
+        console.error('Error exporting PDF:', error);
+      }
     }
   };
   
@@ -88,26 +111,22 @@ const ResumePreview: React.FC = () => {
         </div>
         
         <div className="bg-background rounded-lg p-4 flex justify-center">
-          <div className="w-[8.5in] h-[11in] scale-[0.7] origin-top shadow-xl border border-border rounded-lg overflow-hidden">
-            <PDFExport
-              ref={pdfExportComponent}
-              paperSize="Letter"
-              fileName={`${resume.name.replace(/\s+/g, '-').toLowerCase()}-resume.pdf`}
-              margin={{ top: "1cm", left: "1cm", right: "1cm", bottom: "1cm" }}
-            >
-              <div className={`resume-preview ${getTemplateClassName()} p-8 bg-white h-full`}>
-                {resume.sections.map((section) => (
-                  <div key={section.id} className="mb-6">
-                    {section.type !== 'contact' && (
-                      <h2 className="text-lg font-semibold border-b pb-1 mb-3">
-                        {section.title}
-                      </h2>
-                    )}
-                    {renderSectionContent(section)}
-                  </div>
-                ))}
-              </div>
-            </PDFExport>
+          <div 
+            ref={resumeRef} 
+            className="w-[8.5in] h-[11in] scale-[0.7] origin-top shadow-xl border border-border rounded-lg overflow-hidden"
+          >
+            <div className={`resume-preview ${getTemplateClassName()} p-8 bg-white h-full`}>
+              {resume.sections.map((section) => (
+                <div key={section.id} className="mb-6">
+                  {section.type !== 'contact' && (
+                    <h2 className="text-lg font-semibold border-b pb-1 mb-3">
+                      {section.title}
+                    </h2>
+                  )}
+                  {renderSectionContent(section)}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
