@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Upload } from '@progress/kendo-react-upload';
 import { Card } from '@progress/kendo-react-layout';
@@ -111,20 +110,7 @@ const ResumeUpload: React.FC = () => {
             saveUrl="dummy"
             className="mb-6"
           >
-            <div className="k-dropzone">
-              <div className="k-upload-button">
-                <Button 
-                  themeColor="primary"
-                  className="k-button k-button-md k-rounded-md"
-                  icon={<UploadIcon className="h-4 w-4" />}
-                >
-                  Select File
-                </Button>
-              </div>
-              <div className="k-dropzone-hint text-muted-foreground mt-4">
-                Drag and drop a PDF file here, or use the button above
-              </div>
-            </div>
+            {/* We need to handle children differently with KendoReact Upload */}
           </Upload>
         ) : (
           <div className="bg-secondary p-6 rounded-lg flex items-center gap-4 mb-6">
@@ -147,6 +133,24 @@ const ResumeUpload: React.FC = () => {
           </div>
         )}
 
+        {!uploadedFile && (
+          <div className="flex justify-center mt-4 mb-6">
+            <Button 
+              themeColor="primary"
+              className="k-button k-button-md k-rounded-md"
+              onClick={() => {
+                const fileInput = document.querySelector('input[type="file"]');
+                if (fileInput) {
+                  fileInput.click();
+                }
+              }}
+            >
+              <UploadIcon className="h-4 w-4 mr-2" />
+              Select File
+            </Button>
+          </div>
+        )}
+
         <div className="flex items-center justify-center mt-6">
           <div className="w-full max-w-sm border-t border-border relative">
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-card px-4">
@@ -159,8 +163,8 @@ const ResumeUpload: React.FC = () => {
           <Button
             themeColor="base"
             className="k-button k-button-md k-rounded-md"
-            icon={<FileTextIcon className="h-4 w-4" />}
           >
+            <FileTextIcon className="h-4 w-4 mr-2" />
             Create New Resume
           </Button>
         </div>

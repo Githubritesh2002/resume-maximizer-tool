@@ -20,17 +20,17 @@ const Header: React.FC = () => {
       <AppBarSection>
         <div className="flex items-center gap-3 pr-4">
           <Button
-            icon={<UploadIcon className="h-4 w-4" />}
-            className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base"
             themeColor="base"
+            className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base"
           >
+            <UploadIcon className="h-4 w-4 mr-2" />
             Upload Resume
           </Button>
           <Button
-            icon={<DownloadIcon className="h-4 w-4" />}
-            className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary"
             themeColor="primary"
+            className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary"
           >
+            <DownloadIcon className="h-4 w-4 mr-2" />
             Download
           </Button>
         </div>

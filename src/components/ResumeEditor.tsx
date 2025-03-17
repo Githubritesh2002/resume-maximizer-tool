@@ -177,7 +177,13 @@ const ResumeEditor: React.FC = () => {
         orientation="horizontal"
         style={{ height: 600 }}
       >
-        <SplitterPane size="30%" min="200px">
+        <SplitterPane 
+          size="30%" 
+          min="200px"
+          orientation="horizontal"
+          overlay={false}
+          containsSplitter={false}
+        >
           <div className="h-full p-4 bg-card border-r border-border overflow-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Resume Sections</h3>
@@ -231,7 +237,11 @@ const ResumeEditor: React.FC = () => {
           </div>
         </SplitterPane>
         
-        <SplitterPane>
+        <SplitterPane
+          orientation="horizontal"
+          overlay={false}
+          containsSplitter={false}
+        >
           <div className="h-full p-6 bg-background overflow-auto">
             <div className="mb-4">
               <div className="flex items-center gap-2">

@@ -71,17 +71,17 @@ const ResumePreview: React.FC = () => {
             <Button
               themeColor="base"
               className="k-button k-button-md k-rounded-md"
-              icon={<PrinterIcon className="h-4 w-4" />}
               onClick={() => window.print()}
             >
+              <PrinterIcon className="h-4 w-4 mr-2" />
               Print
             </Button>
             <Button
               themeColor="primary"
               className="k-button k-button-md k-rounded-md"
-              icon={<DownloadIcon className="h-4 w-4" />}
               onClick={handleExportPDF}
             >
+              <DownloadIcon className="h-4 w-4 mr-2" />
               Export PDF
             </Button>
           </div>
