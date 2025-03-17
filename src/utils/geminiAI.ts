@@ -8,7 +8,7 @@ const API_KEY = 'AIzaSyAkvVDMvovPaUMyrZMo2IL4JXUaFdKjYnI';
 export const generateTextWithGemini = async (prompt: string): Promise<string> => {
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${API_KEY}`,
       {
         method: 'POST',
         headers: {
@@ -41,7 +41,7 @@ export const generateTextWithGemini = async (prompt: string): Promise<string> =>
       throw new Error(data.error.message || 'Error generating content');
     }
     
-    // Extract the text from the response
+    // Extract the text from the response (different structure in v1)
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     return text;
   } catch (error) {
