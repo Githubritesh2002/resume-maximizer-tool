@@ -6,7 +6,7 @@ import { Button } from '@progress/kendo-react-buttons';
 import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { Chip } from '@progress/kendo-react-buttons';
 import { Input } from '@progress/kendo-react-inputs';
-import { Accordion, AccordionItem } from '@progress/kendo-react-layout';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/accordion';
 
 const ResumeEditor: React.FC = () => {
   const { resume, setResume, aiSuggestions } = useResumeContext();
@@ -175,24 +175,22 @@ const ResumeEditor: React.FC = () => {
             </Button>
           </div>
           
-          <Accordion>
+          <Accordion type="single" collapsible className="w-full">
             {resume.sections.map((section) => (
-              <AccordionItem 
-                key={section.id}
-                title={section.title}
-                expanded={activeSection === section.id}
-                onAction={() => setActiveSection(section.id)}
-              >
-                <div className="p-2">
-                  <Button
-                    themeColor="base"
-                    fillMode="flat"
-                    className="k-button k-button-sm k-rounded-md w-full text-left"
-                    onClick={() => setActiveSection(section.id)}
-                  >
-                    Edit Content
-                  </Button>
-                </div>
+              <AccordionItem key={section.id} value={section.id}>
+                <AccordionTrigger>{section.title}</AccordionTrigger>
+                <AccordionContent>
+                  <div className="p-2">
+                    <Button
+                      themeColor="base"
+                      fillMode="flat"
+                      className="k-button k-button-sm k-rounded-md w-full text-left"
+                      onClick={() => setActiveSection(section.id)}
+                    >
+                      Edit Content
+                    </Button>
+                  </div>
+                </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
@@ -262,3 +260,4 @@ const ResumeEditor: React.FC = () => {
 };
 
 export default ResumeEditor;
+
