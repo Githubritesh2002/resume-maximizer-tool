@@ -12,7 +12,8 @@ const ResumeUpload: React.FC = () => {
     setUploadedFile, 
     uploadedFile, 
     setIsProcessing, 
-    setResume 
+    setResume,
+    setActiveStep
   } = useResumeContext();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -36,39 +37,122 @@ const ResumeUpload: React.FC = () => {
   const processPdf = async (file: File) => {
     try {
       setIsProcessing(true);
-      const text = await parsePdfText(file);
-      const resumeData = extractResumeData(text);
+      setError(null);
       
-      // Create a new resume object from the extracted data
-      setResume({
-        id: `resume-${Date.now()}`,
-        name: resumeData.contactInfo.name || 'My Resume',
-        sections: [
-          {
-            id: 'contact',
-            type: 'contact',
-            title: 'Contact Information',
-            content: resumeData.contactInfo
-          },
-          {
-            id: 'summary',
-            type: 'summary',
-            title: 'Professional Summary',
-            content: { text: resumeData.summary || '' }
-          },
-          // Add other sections as needed
-        ],
-        templateId: 'modern',
-        lastUpdated: new Date()
-      });
-      
-      setIsProcessing(false);
-      setSuccess('Resume processed successfully');
+      try {
+        const text = await parsePdfText(file);
+        const resumeData = extractResumeData(text);
+        
+        // Create a new resume object from the extracted data
+        setResume({
+          id: `resume-${Date.now()}`,
+          name: resumeData.contactInfo.name || 'My Resume',
+          sections: [
+            {
+              id: 'contact',
+              type: 'contact',
+              title: 'Contact Information',
+              content: resumeData.contactInfo
+            },
+            {
+              id: 'summary',
+              type: 'summary',
+              title: 'Professional Summary',
+              content: { text: resumeData.summary || '' }
+            },
+            {
+              id: 'experience',
+              type: 'experience',
+              title: 'Work Experience',
+              content: { text: '' }
+            },
+            {
+              id: 'education',
+              type: 'education',
+              title: 'Education',
+              content: { text: '' }
+            },
+            {
+              id: 'skills',
+              type: 'skills',
+              title: 'Skills',
+              content: { text: '' }
+            }
+          ],
+          templateId: 'modern',
+          lastUpdated: new Date()
+        });
+        
+        setSuccess('Resume processed successfully');
+        
+        // Move to the next step
+        setTimeout(() => {
+          setActiveStep(1);
+        }, 1000);
+      } catch (parseError) {
+        console.error('PDF parsing error:', parseError);
+        setError('Failed to read PDF content. Please try a different file.');
+      }
     } catch (error) {
       console.error('Error processing PDF:', error);
       setError('Failed to process your resume. Please try again.');
+    } finally {
       setIsProcessing(false);
     }
+  };
+
+  const createNewResume = () => {
+    // Create a blank resume template
+    setResume({
+      id: `resume-${Date.now()}`,
+      name: 'My New Resume',
+      sections: [
+        {
+          id: 'contact',
+          type: 'contact',
+          title: 'Contact Information',
+          content: {
+            name: '',
+            email: '',
+            phone: '',
+            location: ''
+          }
+        },
+        {
+          id: 'summary',
+          type: 'summary',
+          title: 'Professional Summary',
+          content: { text: '' }
+        },
+        {
+          id: 'experience',
+          type: 'experience',
+          title: 'Work Experience',
+          content: { text: '' }
+        },
+        {
+          id: 'education',
+          type: 'education',
+          title: 'Education',
+          content: { text: '' }
+        },
+        {
+          id: 'skills',
+          type: 'skills',
+          title: 'Skills',
+          content: { text: '' }
+        }
+      ],
+      templateId: 'modern',
+      lastUpdated: new Date()
+    });
+    
+    setSuccess('New resume created');
+    
+    // Move to the template selection step
+    setTimeout(() => {
+      setActiveStep(1);
+    }, 1000);
   };
 
   const handleClearFile = () => {
@@ -122,7 +206,6 @@ const ResumeUpload: React.FC = () => {
                     className="k-button k-button-md k-rounded-md"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <UploadIcon className="h-4 w-4 mr-2" />
                     Select File
                   </Button>
                 </div>
@@ -162,8 +245,8 @@ const ResumeUpload: React.FC = () => {
           <Button
             themeColor="base"
             className="k-button k-button-md k-rounded-md"
+            onClick={createNewResume}
           >
-            <FileTextIcon className="h-4 w-4 mr-2" />
             Create New Resume
           </Button>
         </div>

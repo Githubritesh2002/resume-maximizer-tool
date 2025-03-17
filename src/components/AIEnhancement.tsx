@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
-import { Card, CardBody, CardHeader, CardTitle, CardActions } from '@progress/kendo-react-layout';
+import { Card, CardBody, CardHeader, CardTitle } from '@progress/kendo-react-layout';
 import { TextArea } from '@progress/kendo-react-inputs';
 import { Button } from '@progress/kendo-react-buttons';
 import { Loader } from '@progress/kendo-react-indicators';
 import { Notification, NotificationGroup } from '@progress/kendo-react-notification';
 import { useResumeContext } from '../hooks/useResumeContext';
+import { enhanceResumeWithAI } from '../utils/geminiAI';
 
 const AIEnhancement: React.FC = () => {
   const { 
@@ -32,23 +33,30 @@ const AIEnhancement: React.FC = () => {
     }
     
     setIsProcessing(true);
+    setError(null);
     
-    // Simulate AI processing with a timeout
-    // In a real application, this would be an API call to your AI service
-    setTimeout(() => {
-      // Mock AI suggestions
-      const mockSuggestions = [
-        "Add more quantifiable achievements to highlight your impact",
-        "Include keywords like 'project management' and 'agile methodologies'",
-        "Revise your summary to focus more on leadership experience",
-        "Consider adding a skills section with technical proficiencies",
-        "Reorganize experience to emphasize relevant roles first"
-      ];
+    try {
+      // Convert resume sections to plain text
+      const resumeText = resume.sections.map(section => {
+        if (section.type === 'contact') {
+          const contact = section.content;
+          return `${contact.name || ''}\n${contact.email || ''}\n${contact.phone || ''}\n${contact.location || ''}`;
+        } else {
+          return `${section.title}\n${section.content.text || ''}`;
+        }
+      }).join('\n\n');
       
-      setAiSuggestions(mockSuggestions);
-      setIsProcessing(false);
+      // Get AI suggestions using the Gemini API
+      const suggestions = await enhanceResumeWithAI(resumeText, jobDescription);
+      
+      setAiSuggestions(suggestions);
       setSuccess('AI recommendations generated successfully');
-    }, 2000);
+    } catch (err) {
+      console.error('Error generating AI recommendations:', err);
+      setError('Failed to generate recommendations. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
   
   const onDismissNotification = () => {
@@ -64,7 +72,7 @@ const AIEnhancement: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="text-xl font-semibold">AI Resume Enhancement</span>
               <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
-                Powered by AI
+                Powered by Gemini AI
               </span>
             </div>
           </CardTitle>
